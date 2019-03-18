@@ -1,65 +1,120 @@
 <template>
   <div id="Calculator">
-    <div class="display">{{total}}</div>
-    <div v-on:click='pressNumber'   class="btn">7</div>
-    <div v-on:click='pressNumber'   class="btn">8</div>
-    <div v-on:click='pressNumber'   class="btn">9</div>
-    <div v-on:click='pressOperator' class="btn operator">+</div>
-    <div v-on:click='pressNumber'   class="btn">4</div>
-    <div v-on:click='pressNumber'   class="btn">5</div>
-    <div v-on:click='pressNumber'   class="btn">6</div>
-    <div v-on:click='pressOperator' class="btn operator">-</div>
-    <div v-on:click='pressNumber'   class="btn">1</div>
-    <div v-on:click='pressNumber'   class="btn">2</div>
-    <div v-on:click='pressNumber'   class="btn">3</div>
-    <div v-on:click='pressOperator' class="btn operator">*</div>
-    <div v-on:click='pressNumber'   class="btn">0</div>
-    <div v-on:click='pressClear'    class="btn operator">C</div>
-    <div v-on:click='pressResult'   class="btn operator">=</div>
-    <div v-on:click='pressOperator' class="btn operator">/</div>
+    <div class="display">{{expression}}</div>
+    <div v-on:click='pressClear'      class="btn operator">C</div>
+    <div v-on:click='pressDelete'     class="btn operator">del</div>
+    <div v-on:click='pressPercent'    class="btn operator">%</div>
+    <div v-on:click='pressSquareRoot' class="btn operator">√</div>
+    <div v-on:click='pressNumber'     class="btn">7</div>
+    <div v-on:click='pressNumber'     class="btn">8</div>
+    <div v-on:click='pressNumber'     class="btn">9</div>
+    <div v-on:click='pressOperator'   class="btn operator">+</div>
+    <div v-on:click='pressNumber'     class="btn">4</div>
+    <div v-on:click='pressNumber'     class="btn">5</div>
+    <div v-on:click='pressNumber'     class="btn">6</div>
+    <div v-on:click='pressOperator'   class="btn operator">-</div>
+    <div v-on:click='pressNumber'     class="btn">1</div>
+    <div v-on:click='pressNumber'     class="btn">2</div>
+    <div v-on:click='pressNumber'     class="btn">3</div>
+    <div v-on:click='pressOperator'   class="btn operator">*</div>
+    <div v-on:click='pressNumber'     class="btn">0</div>
+    <div v-on:click='pressDot'        class="btn operator">.</div>
+    <div v-on:click='pressResult'     class="btn operator">=</div>
+    <div v-on:click='pressOperator'   class="btn operator">/</div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Calculator',
-  data () {
-    return {
-     total:'0' 
-    }
+  name: "Calculator",
+  created: function() {
+    window.addEventListener("keydown", this.onKeyPress);
   },
-  methods:{
-    pressNumber(event){
-      if(this.total==='0'){
-        this.total=''
+  data() {
+    return {
+      expression: "0",
+      currentNumber: "0"
+    };
+  },
+  methods: {
+    pressNumber(event) {
+      if (this.expression === "0") {
+        this.expression = "";
       }
-      let number = event.target.innerText
-      this.total += number
+      let number = event.target.innerText;
+      this.expression += number;
+      this.currentNumber += number;
     },
-    pressOperator(event){
-      let idxLastLetter = this.total.length-1
-      let operator = event.target.innerText
-      //Don't allow two operator in a row
-      if(!this.total[idxLastLetter].match(/[/+*-]/)){
-      this.total += operator
+    pressOperator(event) {
+      let lastIdx = this.expression.length - 1;
+      let operator = event.target.innerText;
+      //Allow to change the sign
+      if (this.expression === "0" && operator === "-") {
+        this.expression = operator;
       }
-      this.total = this.total.slice(0,-1) + operator
-      
+      //Don't allow two operators in a row
+      if (!this.expression[lastIdx].match(/[/+*-]/)) {
+        this.expression += operator;
+        this.currentNumber = "";
+      }
+      this.expression = this.expression.slice(0, -1) + operator;
     },
-    pressResult(){
-      this.total = eval(this.total).toString()
-      this.$emit('api-call')
-
+    pressResult() {
+      this.expression = eval(this.expression).toString();
+      this.$emit("api-call");
     },
-    pressClear(){
-      this.total='0'
+    pressClear() {
+      this.expression = "0";
+    },
+    pressDelete() {
+      if (this.expression) this.expression = this.expression.slice(0, -1);
+    },
+    pressPercent() {
+      this.expression = (eval(this.expression) / 100).toString();
+    },
+    pressSquareRoot() {
+      this.expression = Math.sqrt(eval(this.expression));
+    },
+    pressDot() {
+      let lastIdx = this.expression.length - 1;
+      //Don't allow more than one dot in the same number or after an operator
+      if (
+        !this.currentNumber.includes(".") &&
+        !this.expression[lastIdx].match(/[/+*-]/)
+      ) {
+        this.expression += ".";
+        this.currentNumber += ".";
+      }
+    },
+    onKeyPress(event) {
+      if (event.key === "Enter") {
+        this.pressResult();
+      } else if (event.key.match(/[0-9]/)) {
+        let newEvent = {};
+        newEvent["target"] = {};
+        newEvent["target"]["innerText"] = event.key;
+        this.pressNumber(newEvent);
+      } else if (event.key.match(/[/+*-]/)) {
+        let newEvent = {};
+        newEvent["target"] = {};
+        newEvent["target"]["innerText"] = event.key;
+        this.pressOperator(newEvent);
+      } else if (event.key === '.'){
+        this.pressDot()
+      } else if (event.key === '√'){
+        this.pressSquareRoot()
+      } else if (event.key === 'Backspace'){
+        this.pressDelete()
+      } else if (event.key === 'c'){
+        this.pressClear()
+      }
     }
   }
-}
+};
 </script>
 
 <style lang="scss">
-#Calculator{
+#Calculator {
   margin: 0 auto;
   width: 400px;
   font-size: 40px;
@@ -81,15 +136,14 @@ export default {
   margin-bottom: 3%;
 }
 .btn {
-  background-color: #F2F2F2;
+  background-color: #f2f2f2;
   border: 1px solid #999;
   border-radius: 30%;
   text-align: center;
   margin: 2%;
 }
 
-.operator{
+.operator {
   background-color: orange;
 }
-
 </style>

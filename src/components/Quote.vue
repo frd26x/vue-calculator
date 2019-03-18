@@ -1,6 +1,6 @@
 <template>
   <div id="quote">
-    <h2>{{quote}}</h2>
+    <h2><i>"{{quote}}"</i> K.W.</h2>
   </div>
 </template>
 
@@ -12,4 +12,9 @@ export default {
 </script>
 
 <style lang="scss">
+#quote{
+  background-color: bisque;
+  padding: 1%;
+  margin-top: 3%;
+}
 </style>
