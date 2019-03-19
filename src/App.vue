@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Calculator v-on:api-call="apiCall"></Calculator>
-    <Quote v-bind:quote="quote"></Quote>
+    <Quote v-if="quote" v-bind:quote="quote"></Quote>
   </div>
 </template>
 
@@ -18,13 +18,15 @@ export default {
   },
   data () {
     return {
-      quote:''
+      quote:null
     }
   },
   methods:{
-    apiCall(){
-      axios.get('https://api.kanye.rest')
-      .then(response=>this.quote=response.data.quote)
+    apiCall(result){
+      //The Api requires an integer
+      let integer = parseInt(result)
+      axios.get(`http://numbersapi.com/${integer}`)
+      .then(response=>this.quote=response.data)
       .catch(err=>console.log(err))
     }
   }

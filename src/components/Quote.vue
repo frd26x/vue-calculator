@@ -1,6 +1,6 @@
 <template>
   <div id="quote">
-    <h2><i>"{{quote}}"</i> K.W.</h2>
+    <h2><i>"{{quote}}"</i></h2>
   </div>
 </template>
 

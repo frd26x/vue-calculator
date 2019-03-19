@@ -65,19 +65,20 @@ export default {
     },
     pressResult() {
       this.expression = eval(this.expression).toString();
-      this.$emit("api-call");
+      this.$emit("api-call",this.expression);
     },
     pressClear() {
       this.expression = "0";
     },
     pressDelete() {
-      if (this.expression) this.expression = this.expression.slice(0, -1);
+      this.expression = this.expression.slice(0, -1);
     },
     pressPercent() {
       this.expression = (eval(this.expression) / 100).toString();
     },
     pressSquareRoot() {
       this.expression = Math.sqrt(eval(this.expression));
+      this.$emit("api-call",this.expression);
     },
     pressDot() {
       let lastIdx = this.expression.length - 1;
@@ -145,7 +146,7 @@ export default {
   border: 1px solid #999;
   border-radius: 30%;
   text-align: center;
-  margin: 2%;
+  margin: 3%;
 }
 
 .operator {
