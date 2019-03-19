@@ -30,6 +30,9 @@ export default {
   created: function() {
     window.addEventListener("keydown", this.onKeyPress);
   },
+  beforeDestroy: function() {
+    window.removeEventListener("keydown", this.onKeyPress);
+  },
   data() {
     return {
       expression: "0",
@@ -40,6 +43,7 @@ export default {
     pressNumber(event) {
       if (this.expression === "0") {
         this.expression = "";
+        this.currentNumber = ""
       }
       let number = event.target.innerText;
       this.expression += number;
@@ -48,12 +52,12 @@ export default {
     pressOperator(event) {
       let lastIdx = this.expression.length - 1;
       let operator = event.target.innerText;
-      //Allow to change the sign
+      //Allow to change the sign of a number
       if (this.expression === "0" && operator === "-") {
         this.expression = operator;
       }
-      //Don't allow two operators in a row
-      if (!this.expression[lastIdx].match(/[/+*-]/)) {
+      //Don't allow two operators in a row or an operator after a dot
+      if (!this.expression[lastIdx].match(/[/+*-.]/)) {
         this.expression += operator;
         this.currentNumber = "";
       }
@@ -86,27 +90,28 @@ export default {
         this.currentNumber += ".";
       }
     },
+    buildEvent(keyPressed) {
+      let newEvent = {};
+      newEvent["target"] = {};
+      newEvent["target"]["innerText"] = keyPressed;
+      return newEvent;
+    },
     onKeyPress(event) {
+      
       if (event.key === "Enter") {
         this.pressResult();
       } else if (event.key.match(/[0-9]/)) {
-        let newEvent = {};
-        newEvent["target"] = {};
-        newEvent["target"]["innerText"] = event.key;
-        this.pressNumber(newEvent);
+        this.pressNumber(this.buildEvent(event.key));
       } else if (event.key.match(/[/+*-]/)) {
-        let newEvent = {};
-        newEvent["target"] = {};
-        newEvent["target"]["innerText"] = event.key;
-        this.pressOperator(newEvent);
-      } else if (event.key === '.'){
-        this.pressDot()
-      } else if (event.key === '√'){
-        this.pressSquareRoot()
-      } else if (event.key === 'Backspace'){
-        this.pressDelete()
-      } else if (event.key === 'c'){
-        this.pressClear()
+        this.pressOperator(this.buildEvent(event.key));
+      } else if (event.key === ".") {
+        this.pressDot();
+      } else if (event.key === "√") {
+        this.pressSquareRoot();
+      } else if (event.key === "Backspace") {
+        this.pressDelete();
+      } else if (event.key === "c") {
+        this.pressClear();
       }
     }
   }
