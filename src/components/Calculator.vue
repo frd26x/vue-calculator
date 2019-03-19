@@ -83,6 +83,7 @@ export default {
       if (this.expression.includes(".")) {
         this.hasCurrentNumberDot = true;
       }
+      this.$emit("api-call", this.expression);
     },
     pressSquareRoot() {
       this.expression = Math.sqrt(eval(this.expression));
