@@ -118,6 +118,8 @@ export default {
         this.pressDelete();
       } else if (event.key === "c") {
         this.pressClear();
+      } else if (event.key === "%") {
+        this.pressPercent();
       }
     }
   }
