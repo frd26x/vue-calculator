@@ -36,18 +36,16 @@ export default {
   data() {
     return {
       expression: "0",
-      currentNumber: "0"
+      hasCurrentNumberDot: false
     };
   },
   methods: {
     pressNumber(event) {
       if (this.expression === "0") {
         this.expression = "";
-        this.currentNumber = ""
       }
       let number = event.target.innerText;
       this.expression += number;
-      this.currentNumber += number;
     },
     pressOperator(event) {
       let lastIdx = this.expression.length - 1;
@@ -59,38 +57,46 @@ export default {
       //Don't allow two operators in a row or an operator after a dot
       if (!this.expression[lastIdx].match(/[/+*-.]/)) {
         this.expression += operator;
-        this.currentNumber = "";
+        this.hasCurrentNumberDot = false;
       }
+      //replace the previous operator or the dot with the new operator provided
       this.expression = this.expression.slice(0, -1) + operator;
+      this.hasCurrentNumberDot = false;
     },
     pressResult() {
       this.expression = eval(this.expression).toString();
-      this.$emit("api-call",this.expression);
+      this.$emit("api-call", this.expression);
     },
     pressClear() {
       this.expression = "0";
+      this.hasCurrentNumberDot = false;
     },
     pressDelete() {
+      let lastIdx = this.expression.length - 1;
+      if(this.expression[lastIdx]==='.'){
+        this.hasCurrentNumberDot = false
+      }
       this.expression = this.expression.slice(0, -1);
     },
     pressPercent() {
       this.expression = (eval(this.expression) / 100).toString();
+      if (this.expression.includes(".")) {
+        this.hasCurrentNumberDot = true;
+      }
     },
     pressSquareRoot() {
       this.expression = Math.sqrt(eval(this.expression));
-      this.$emit("api-call",this.expression);
+      this.$emit("api-call", this.expression);
     },
     pressDot() {
       let lastIdx = this.expression.length - 1;
       //Don't allow more than one dot in the same number or after an operator
-      if (
-        !this.currentNumber.includes(".") &&
-        !this.expression[lastIdx].match(/[/+*-]/)
-      ) {
+      if (!this.hasCurrentNumberDot && !this.expression[lastIdx].match(/[/+*-]/)) {
         this.expression += ".";
-        this.currentNumber += ".";
+        this.hasCurrentNumberDot = true;
       }
     },
+    //Build fake event so I can use it in pressNumber and pressOperator and access event.target.innerText
     buildEvent(keyPressed) {
       let newEvent = {};
       newEvent["target"] = {};
@@ -98,7 +104,6 @@ export default {
       return newEvent;
     },
     onKeyPress(event) {
-      
       if (event.key === "Enter") {
         this.pressResult();
       } else if (event.key.match(/[0-9]/)) {
